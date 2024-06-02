@@ -5,40 +5,41 @@
 # -------------------------------------------------------------- #
 
 
-
 query_tradingview <- function(
     columns  = c("name", "market", "exchange", "close", "market_cap_basic"), 
     market   = "america",
-    exchange = c("AMEX", "NASDAQ", "NYSE"),
     type     = c("stock", "dr", "fund"),
     subtype  = c("common", "etf", "unit", "mutual", "money", "reit", "trust"),
     sortby   = "market_cap_basic",
-    range    = 0:50
+    range    = 0:50,
+    exchange = NULL
 ) {
   
-  httr::POST(
+  if(is.null(exchange)) exchange <- get_exchanges(market) 
+  
+  X = httr::POST(
     url    = URL_TRADINGVIEW(market),
     config = httr::add_headers(.headers = HEADERS), 
     body   = CUSTOM_API_SETTINGS(columns, market, exchange, type, subtype, sortby, range)
-  ) %>% 
+    ) %>% 
     content("text") %>% 
     fromJSON() %>% 
+    null_to_na_recurse() %>% 
     clean_tradingview_data(., columns)
-  
 }
 
 
 clean_tradingview_data <- function(X, columns) {
   
   bind_rows(
-    lapply(X$data$d, function(x) {
-      data.frame(t(data.frame(unlist(x), row.names = columns)), row.names = NULL)
+    lapply(X$data, function(x) {
+      data.frame(t(data.frame(unlist(x$d), row.names = columns)), row.names = NULL)
     })) %>% 
     as_tibble() %>%
     # format date columns
     mutate_at(
       vars(columns[columns %in% COLUMNS_DATE]), 
-      function(x) as.POSIXct(as.numeric(x), origin="1970-01-01")
+      function(x) as.POSIXct(as.numeric(x), origin = "1970-01-01")
     ) %>% 
     # format numerical columns
     mutate_at(
@@ -48,6 +49,16 @@ clean_tradingview_data <- function(X, columns) {
     mutate_at(
       vars(columns[columns %in% COLUMNS_LOGIC]), as.logical
     ) 
-    
   
 }
+
+
+
+
+
+
+
+
+
+
+

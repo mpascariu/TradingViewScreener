@@ -6,18 +6,19 @@
 remove(list = ls())
 library(tidyverse)
 library(httr)
-library(jsonlite)
+library(rjson)
 
 
 cols = c(
   "name", 
   "description",
+  "exchange",
   "industry",
   "country",
-  "exchange",
   "is_primary",
   "currency",
   "close", 
+  "Value.Traded",
   "market_cap_basic", 
   "recommendation_buy", 
   "recommendation_sell",
@@ -27,13 +28,22 @@ cols = c(
 
 query_tradingview(
   columns  = cols, 
-  market   = "america",
-  exchange = c("AMEX", "NASDAQ", "NYSE"),
+  market   = "vietnam",
   type     = c("stock", "dr", "fund"),
   subtype  = c("common", "etf", "unit", "mutual", "money", "reit", "trust"),
-  sortby   = "market_cap_basic",
+  sortby   = "Value.Traded",
   range    = 0:50
 ) %>% 
-  print(width = Inf)
+  filter(is_primary == TRUE) %>% 
+  print(width = Inf, n = Inf)
+  
+
+
+
+
+
+
+
+
 
 
