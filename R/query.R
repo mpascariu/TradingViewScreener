@@ -17,11 +17,13 @@ query_tradingview <- function(
   
   if(is.null(exchange)) exchange <- get_exchanges(market) 
   
-  X = httr::POST(
+  raw <- httr::POST(
     url    = URL_TRADINGVIEW(market),
     config = httr::add_headers(.headers = HEADERS), 
     body   = CUSTOM_API_SETTINGS(columns, market, exchange, type, subtype, sortby, range)
-    ) %>% 
+    )
+  
+  raw %>% 
     content("text") %>% 
     fromJSON() %>% 
     null_to_na_recurse() %>% 

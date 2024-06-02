@@ -9,7 +9,7 @@ library(httr)
 library(rjson)
 
 
-cols = c(
+columns = c(
   "name", 
   "description",
   "exchange",
@@ -27,7 +27,7 @@ cols = c(
 
 
 query_tradingview(
-  columns  = cols, 
+  columns  = columns, 
   market   = "vietnam",
   type     = c("stock", "dr", "fund"),
   subtype  = c("common", "etf", "unit", "mutual", "money", "reit", "trust"),
